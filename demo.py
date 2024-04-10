@@ -1,43 +1,41 @@
-from abc import ABC, abstractmethod
+from campana import Campana
+from datetime import datetime
+from error import SubTipoInvalidoError, LargoExcedidoError
 
-class Membresia(ABC):
-    def __init__(self, correo_suscriptor: str, numero_tarjeta: str):
-        self.__correo_suscriptor = correo_suscriptor
-        self.__numero_tarjeta = numero_tarjeta
+# Inicio de un diccionario con los datos necesarios para un anuncio de tipo video
+anuncio_dict = {"duracion": 50, "url_archivo": "direccion.com", "url_clic": "direccion.cl", "sub_tipo": "instream"}
+# Creacion de la camapaña
+super_campana = Campana(nombre="Super Campana", fecha_inicio=datetime.now(), fecha_termino=datetime.now(), anuncio=anuncio_dict)
 
-    @property
-    def correo_suscriptor(self):
-        return self.__correo_suscriptor
+# Prueba de funcionamiento
+print(super_campana)
 
-    @property
-    def numero_tarjeta(self):
-        return self.__numero_tarjeta
+try:
+    # Se intenta cambiar el sub tipo
+    sub_tipo = input("Introduzca el nuevo sub tipo para el anuncio\n\n")
+    super_campana.anuncios[0].sub_tipo = sub_tipo
+except SubTipoInvalidoError as e:
+    # Si falla por sub tipo se guarda el error en un log
+    with open("error.log", "a+", encoding="utf-8") as log:
+        log.write(f"El sub tipo {e.sub_tipo} no es un valor válido para este tipo de anuncio, solo pueden ser {e.sub_tipos}\n")
+        log.close()
+except Exception as e:
+    with open("error.log", "a+", encoding="utf-8") as log:
+        log.write(f"{e.__str__()}\n")
+        log.close()
 
-    @abstractmethod
-    def cambiar_suscripcion(self, nueva_membresia: int):
-        pass
+try:
+    # Se intenta cambiar el nombre de la campaña
+    nombre = input("Introduzca el nuevo nombre de la campaña\n\n")
+    super_campana.nombre = nombre
+except LargoExcedidoError as e:
+    # Si falla por el máximo de caracteres se guarda el error en un log
+    with open("error.log", "a+", encoding="utf-8") as log:
+        log.write(f"El nombre {e.nombre} no es un valor válido para el nombre de campaña, el máximo de caracteres es {e.maximo}\n")
+        log.close()
+except Exception as e:
+    with open("error.log", "a+", encoding="utf-8") as log:
+        log.write(f"{e.__str__()}\n")
+        log.close()
 
-    def _crear_nueva_membresia(self, nueva_membresia: int):
-        if nueva_membresia == 1:
-            return Basica(self.correo_suscriptor, self.numero_tarjeta)
-        elif nueva_membresia == 2:
-            return Familiar(self.correo_suscriptor, self.numero_tarjeta)
-        elif nueva_membresia == 3:
-            return SinConexion(self.correo_suscriptor, self.numero_tarjeta)
-        elif nueva_membresia == 4:
-            return Pro(self.correo_suscriptor, self.numero_tarjeta)
-
-class Gratis(Membresia):
-    pass
-
-class Basica(Membresia):
-    pass
-
-class Familiar(Membresia):
-    pass
-
-class SinConexion(Membresia):
-    pass
-
-class Pro(Membresia):
-    pass
+print(super_campana)
